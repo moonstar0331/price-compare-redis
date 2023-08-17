@@ -65,30 +65,36 @@ public class LowestPriceServiceImpl implements LowestPriceService {
     }
 
     public List<ProductGrp> getProductGrpUsingKeyword(String keyword) {
+
         List<ProductGrp> returnInfo = new ArrayList<>();
-        ProductGrp tempProGrp = new ProductGrp();
 
         // input 받은 keyword 로 productGrpId를 조회
         List<String> prodGrpIdList = new ArrayList<>();
-        prodGrpIdList = List.copyOf(myProdPriceRedis.opsForZSet().range(keyword, 0, 9));
-        Product tempProduct = new Product();
+        prodGrpIdList = List.copyOf(myProdPriceRedis.opsForZSet().reverseRange(keyword, 0, 9));
         List<Product> tempProdList = new ArrayList<>();
 
         // 10개 prodGrpId로 loop
         for (final String prodGrpId : prodGrpIdList) {
             // Loop 를 타면서 productGrpId 으로 product:price 가져오기 (10개)
+
+            ProductGrp tempProGrp = new ProductGrp();
+
             Set ProdAndPriceList = new HashSet();
             ProdAndPriceList = myProdPriceRedis.opsForZSet().rangeWithScores(prodGrpId, 0, 9);
 
             // Loop 를 타면서 product object 에 바인em (10개)
             Iterator<Object> prodPriceObj = ProdAndPriceList.iterator();
+
+
             while(prodPriceObj.hasNext()) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String, String> prodPriceMap = objectMapper.convertValue(prodPriceObj.next(), Map.class);
 
                 // product object 에 바인드
+                Product tempProduct = new Product();
                 tempProduct.setProductId(prodPriceMap.get("value"));
                 tempProduct.setPrice(Integer.parseInt(prodPriceMap.get("score")));
+
                 tempProdList.add(tempProduct);
             }
             tempProGrp.setProductGrpId(prodGrpId);
