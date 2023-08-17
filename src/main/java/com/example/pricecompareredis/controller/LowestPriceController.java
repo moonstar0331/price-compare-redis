@@ -5,8 +5,13 @@ import com.example.pricecompareredis.vo.Keyword;
 import com.example.pricecompareredis.vo.Product;
 import com.example.pricecompareredis.vo.ProductGrp;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -19,6 +24,38 @@ public class LowestPriceController {
     @GetMapping("/getZSETValue")
     public Set GetZsetValue(String key) {
         return lowestPriceService.getZsetValue(key);
+    }
+
+    @GetMapping("/product1")
+    public Set getZSetValueWithStatus(String key) {
+        try {
+            return lowestPriceService.getZSetValueWithStatus(key);
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
+    }
+
+    @GetMapping("/product2")
+    public Set getZSetValueUsingExController(String key) throws Exception {
+        try {
+            return lowestPriceService.getZSetValueWithStatus(key);
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
+    }
+
+    @GetMapping("/product3")
+    public ResponseEntity<Set> getZSetValueUsingExControllerWithSpecificException(String key) throws Exception {
+        Set<String> mySet = new HashSet<>();
+        try {
+            mySet = lowestPriceService.getZSetValueWithSpecificException(key);
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
+
+        HttpHeaders responseHeaders = new HttpHeaders();
+        return new ResponseEntity<>(mySet, responseHeaders, HttpStatus.OK);
     }
 
     @PutMapping("/product")

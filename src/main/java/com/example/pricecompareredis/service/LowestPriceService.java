@@ -9,6 +9,10 @@ import java.util.Set;
 public interface LowestPriceService {
     Set getZsetValue(String key);
 
+    Set getZSetValueWithStatus(String key) throws Exception;
+
+    Set getZSetValueWithSpecificException(String key) throws Exception;
+
     int setNewProduct(Product newProduct);
 
     int setNewProductGrp(ProductGrp newProductGrp);
